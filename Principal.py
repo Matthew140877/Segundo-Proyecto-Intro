@@ -1,3 +1,4 @@
+import json
 from tkinter import *
 
 class MatrizApp:
@@ -30,6 +31,12 @@ class MatrizApp:
         color_menu.add_command(label="Muro", command=lambda: self.set_color("brown"))
         color_menu.add_command(label="Salida", command=lambda: self.set_color("yellow"))
         color_menu.add_command(label="Investigar", command=self.investigar)
+        
+        # Añadir opciones para guardar y cargar mapa
+        mapas_menu = Menu(self.menu, tearoff=0)
+        self.menu.add_cascade(label="Mapas", menu=color_menu)
+        self.menu.add_command(label="Guardar Mapa", command=self.guardar_mapa)
+        self.menu.add_command(label="Cargar Mapa", command=self.cargar_mapa)
 
         for i in range(10):
             row = []
@@ -71,6 +78,33 @@ class MatrizApp:
     def investigar(self):
         self.investigating = True  # Activar modo investigación
         print("Modo investigación activado. Haz clic en una casilla para investigarla.")
+
+    def guardar_mapa(self):
+        mapa = []
+        for row in self.buttons:
+            fila = []
+            for button in row:
+                color = button.cget("background")
+                fila.append(color)
+            mapa.append(fila)
+        
+        with open('mapas.json', 'w') as f:
+            json.dump(mapa, f)
+        print("Mapa guardado en 'mapas.json'.")
+
+    def cargar_mapa(self):
+        try:
+            with open('mapas.json', 'r') as f:
+                mapa = json.load(f)
+            for i in range(10):
+                for j in range(10):
+                    color = mapa[i][j]
+                    self.buttons[i][j].configure(bg=color)
+            print("Mapa cargado desde 'mapas.json'.")
+        except FileNotFoundError:
+            print("El archivo 'mapas.json' no fue encontrado.")
+        except json.JSONDecodeError:
+            print("Error al leer el archivo 'mapas.json'.")
 
 root = Tk()
 app = MatrizApp(root)
