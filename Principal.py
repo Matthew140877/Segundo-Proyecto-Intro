@@ -33,8 +33,6 @@ class MatrizApp:
         color_menu.add_command(label="Investigar", command=self.investigar)
         
         # Añadir opciones para guardar y cargar mapa
-        mapas_menu = Menu(self.menu, tearoff=0)
-        self.menu.add_cascade(label="Mapas", menu=color_menu)
         self.menu.add_command(label="Guardar Mapa", command=self.guardar_mapa)
         self.menu.add_command(label="Cargar Mapa", command=self.cargar_mapa)
 
