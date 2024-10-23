@@ -7,15 +7,17 @@ class MatrizApp:
         
         # Eliminar el padding del frame principal
         master.grid_propagate(False)
-        master.configure(width=400, height=400)  # Ajusta estos valores según sea necesario
+        master.configure(width=400, height=400)
 
         self.buttons = []
         self.current_color = "green"  # Color inicial
         self.color_names = {
             "green": "Veneno",
             "brown": "Muro",
-            "yellow": "Salida"
+            "yellow": "Salida",
+            "SystemButtonFace": "Vacío"  # Añadido para botones sin color
         }
+        self.investigating = False  # Nueva variable para controlar el modo investigación
 
         # Crear el menú
         self.menu = Menu(master)
@@ -45,23 +47,30 @@ class MatrizApp:
             master.grid_columnconfigure(i, weight=1)
 
     def set_color(self, color):
-        self.current_color = color  # Cambia el color actual
+        self.investigating = False  # Desactivar modo investigación
+        self.current_color = color
 
     def toggle_wall(self, i, j):
         button = self.buttons[i][j]
-        current_color = button.cget("background")
-
-        # Cambiar el color del botón al color actual
-        if current_color == "SystemButtonFace" or current_color == "":
-            button.configure(bg=self.current_color)  # Cambia al color seleccionado
+        
+        if self.investigating:
+            # Si estamos en modo investigación
+            current_color = button.cget("background")
+            if current_color == "":
+                current_color = "SystemButtonFace"
+            print(f"Casilla [{i},{j}] - Color: {self.color_names.get(current_color, 'Desconocido')}")
+            self.investigating = False  # Desactivar modo investigación después de investigar
         else:
-            button.configure(bg="SystemButtonFace")  # Restablece al color por defecto
+            # Comportamiento normal de toggle
+            current_color = button.cget("background")
+            if current_color == "SystemButtonFace" or current_color == "":
+                button.configure(bg=self.current_color)
+            else:
+                button.configure(bg="SystemButtonFace")
 
     def investigar(self):
-        # Imprimir el nombre del color seleccionado actualmente
-        print("El color seleccionado es:", self.color_names[self.current_color])
-
-
+        self.investigating = True  # Activar modo investigación
+        print("Modo investigación activado. Haz clic en una casilla para investigarla.")
 
 root = Tk()
 app = MatrizApp(root)
