@@ -1,6 +1,6 @@
+
 import json
 from tkinter import *
-
 class MatrizApp:
     def __init__(self, master):
         self.master = master
@@ -32,9 +32,19 @@ class MatrizApp:
         color_menu.add_command(label="Salida", command=lambda: self.set_color("yellow"))
         color_menu.add_command(label="Investigar", command=self.investigar)
         
-        # Añadir opciones para guardar y cargar mapa
-        self.menu.add_command(label="Guardar Mapa", command=self.guardar_mapa)
-        self.menu.add_command(label="Cargar Mapa", command=self.cargar_mapa)
+        # Añadir opciones para guardar mapa
+        Guardar_menu = Menu(self.menu,tearoff=0)
+        self.menu.add_cascade(label="Guardar Mapa", menu=Guardar_menu)
+        Guardar_menu.add_command(label="Espacio 1", command= lambda: self.guardar_mapa(1))
+        Guardar_menu.add_command(label="Espacio 2", command= lambda: self.guardar_mapa(2))
+        Guardar_menu.add_command(label="Espacio 3" ,command= lambda: self.guardar_mapa(3))
+
+        # Añadir opciones para cargar mapa
+        Cargar_menu = Menu(self.menu,tearoff=0)
+        self.menu.add_cascade(label="Cargar Mapa", menu=Cargar_menu)
+        Cargar_menu.add_command(label="Mapa 1", command= lambda: self.cargar_mapa(1))
+        Cargar_menu.add_command(label="Mapa 2", command= lambda: self.cargar_mapa(2))
+        Cargar_menu.add_command(label="Mapa 3" ,command= lambda: self.cargar_mapa(3))
 
         for i in range(10):
             row = []
@@ -45,7 +55,7 @@ class MatrizApp:
                 button.grid(row=i, column=j, padx=0, pady=0, sticky="nsew")
                 row.append(button)
             self.buttons.append(row)
-        
+      
         # Hacer que las filas y columnas se expandan uniformemente
         for i in range(10):
             master.grid_rowconfigure(i, weight=1)
@@ -77,7 +87,20 @@ class MatrizApp:
         self.investigating = True  # Activar modo investigación
         print("Modo investigación activado. Haz clic en una casilla para investigarla.")
 
-    def guardar_mapa(self):
+
+    def guardar_mapa(self, numero):
+        if numero < 1 or numero > 3:
+            print("Número inválido. Debe ser del 1 al 3.")
+            return
+
+        # Cargar mapas existentes o crear uno nuevo
+        try:
+            with open('mapas.json', 'r') as f:
+                mapas = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            mapas = {1: [], 2: [], 3: []}  # Inicializar si no existe
+
+        # Guardar el mapa actual en el diccionario
         mapa = []
         for row in self.buttons:
             fila = []
@@ -85,20 +108,32 @@ class MatrizApp:
                 color = button.cget("background")
                 fila.append(color)
             mapa.append(fila)
-        
-        with open('mapas.json', 'w') as f:
-            json.dump(mapa, f)
-        print("Mapa guardado en 'mapas.json'.")
 
-    def cargar_mapa(self):
+        mapas[numero] = mapa  # Asignar el mapa al número correspondiente
+
+        # Guardar todos los mapas en el archivo
+        with open('mapas.json', 'w') as f:
+            json.dump(mapas, f)
+        print(f"Mapa {numero} guardado en 'mapas.json'.")
+
+    def cargar_mapa(self, numero):
+        if numero < 1 or numero > 3:
+            print("Número inválido. Debe ser del 1 al 3.")
+            return
+
+        # Cargar desde el archivo
         try:
             with open('mapas.json', 'r') as f:
-                mapa = json.load(f)
+                mapas = json.load(f)
+            mapa = mapas.get(numero)  # Obtener el mapa correspondiente
+            if mapa is None:
+                print(f"No se encontró el mapa {numero}.")
+                return
             for i in range(10):
                 for j in range(10):
                     color = mapa[i][j]
                     self.buttons[i][j].configure(bg=color)
-            print("Mapa cargado desde 'mapas.json'.")
+            print(f"Mapa {numero} cargado desde 'mapas.json'.")
         except FileNotFoundError:
             print("El archivo 'mapas.json' no fue encontrado.")
         except json.JSONDecodeError:
