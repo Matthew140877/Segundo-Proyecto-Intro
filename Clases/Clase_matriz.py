@@ -72,12 +72,6 @@ class MatrizApp:
         """Destruye la ventana de la matriz."""
         self.master.destroy()
 
-    def iniciar_simulacion(self):
-    # Asegúrate de que la hormiga esté inicializada y en una posición válida
-        if self.hormiga is None:
-            self.hormiga = Hormiga(self.canvas, self.tamano_matriz)  # Inicializa la hormiga
-            self.hormiga.x, self.hormiga.y = 0, 0  # Cambia esto a la posición inicial dese
-
     def set_color(self, color):
         """Cambia el color actual para la matriz."""
         self.current_color = color
