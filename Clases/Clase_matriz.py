@@ -2,7 +2,6 @@ import json
 import random
 import os  # Importar os para manejar rutas
 from tkinter import *
-from Clases.Clase_hormiga import Hormiga
 
 class MatrizApp:
     def __init__(self, master):

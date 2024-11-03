@@ -1,9 +1,8 @@
-from tkinter import Tk, Frame, Button, Toplevel, Canvas, messagebox
+from tkinter import Tk, Frame, Button, Toplevel, messagebox, Label
 import os
 import json
 from Clases.Clase_matriz import MatrizApp
 from Clases.Mapa_simulacion import MapaCanvas
-
 
 class Master:
     def __init__(self, root):
@@ -55,7 +54,27 @@ class Master:
             return
 
         # Crear el MapaCanvas para mostrar la matriz
-        MapaCanvas(mapa_top, matriz)
+        mapa_canvas = MapaCanvas(mapa_top, matriz)
+
+        # Crear un Frame para mostrar los datos
+        datos_frame = Frame(mapa_top)
+        datos_frame.pack()
+
+        # Crear etiquetas para mostrar la vida, el contador y el contador de puntos
+        self.vida_label = Label(datos_frame, text="Vida: 3")
+        self.vida_label.pack(side="left")
+        mapa_canvas.vida_label = self.vida_label
+
+        self.contador_label = Label(datos_frame, text="Contador: 0")
+        self.contador_label.pack(side="left")
+        mapa_canvas.contador_label = self.contador_label
+
+        self.puntos_label = Label(datos_frame, text="Puntos: 0")
+        self.puntos_label.pack(side="left")
+        mapa_canvas.puntos_label = self.puntos_label
+
+        # Inicializar la hormiga con referencia a las etiquetas
+        mapa_canvas.inicializar_datos(self.vida_label, self.contador_label, self.puntos_label)
 
 # Inicializar la aplicación
 root = Tk()
