@@ -11,11 +11,13 @@ class Hormiga:
         self.hormiga_oval = None  # Variable para guardar la referencia del óvalo de la hormiga
         self.vida = 3  # Vida inicial de la hormiga
         self.contador = 0  # Contador inicial
+        self.puntos = 0
+        self.nivel_alcohol = 0
 
     caminos_fallidos = set()  # Memoria compartida de caminos fallidos (almacena coordenadas)
     coordenadas_pendientes = {}  # Almacena coordenadas de posibles entradas a callejones
 
-    def mover(self, vida_label, contador_label):
+    def mover(self, vida_label, contador_label, puntos_label, alcohol_label):
         """Mueve la hormiga en la dirección actual y registra caminos fallidos."""
         if self.hormiga_oval:
             self.canvas.delete(self.hormiga_oval)
@@ -23,20 +25,37 @@ class Hormiga:
         rect_id = self.canvas.find_closest(self.x * 40 + 20, self.y * 40 + 20)[0]
         color_actual = self.canvas.itemcget(rect_id, 'fill')
 
+        if color_actual == "yellow":
+            print("La hormiga ha llegado a la meta. Movimiento detenido.")
+            return
+
         if color_actual == "green":
             if (self.x, self.y) not in Hormiga.caminos_fallidos:
                 Hormiga.caminos_fallidos.add((self.x, self.y))
                 print(f"Agregado a caminos fallidos (veneno): {(self.x, self.y)}")
             self.vida = 0  # La hormiga muere instantáneamente
-            self.reiniciar_hormiga(vida_label, contador_label)
+            self.reiniciar_hormiga(vida_label, contador_label, puntos_label, alcohol_label)
             return
+
+        if color_actual == "red":
+            self.nivel_alcohol += 5
+            print(f"Vino encontrado en ({self.x}, {self.y}). Alcohol: {self.nivel_alcohol}")
+            self.canvas.itemconfig(rect_id, fill="white")
 
         if self.vida <= 0:
             if (self.start_x, self.start_y) not in Hormiga.caminos_fallidos:
                 Hormiga.caminos_fallidos.add((self.start_x, self.start_y))
                 print(f"Agregado a caminos fallidos (inicio muerto): {(self.start_x, self.start_y)}")
-            self.reiniciar_hormiga(vida_label, contador_label)
+            self.reiniciar_hormiga(vida_label, contador_label, puntos_label, alcohol_label)
             return
+
+        elif color_actual == "gray":  # Azúcar
+
+            self.puntos += 3
+            print(f"Azúcar encontrada en ({self.x}, {self.y}). Puntos: {self.puntos}")
+            # Cambia la celda a blanco para simular que el azúcar desaparece
+            self.canvas.itemconfig(rect_id, fill="white")
+
 
         posibles_direcciones = [(0, 1), (0, -1), (1, 0), (-1, 0)]
         direcciones_validas = []
@@ -87,32 +106,70 @@ class Hormiga:
         self.hormiga_oval = self.canvas.create_oval(self.x * 40, self.y * 40, (self.x + 1) * 40, (self.y + 1) * 40, fill="red")
         vida_label.config(text=f"Vida: {self.vida}")
         contador_label.config(text=f"Movimientos: {self.contador}")
-        self.canvas.after(200, self.mover, vida_label, contador_label)
+        puntos_label.config(text=f"Puntos:{self.puntos}")
+        alcohol_label.config(text=f"Alcohol:{self.nivel_alcohol}")
+        self.canvas.after(200, self.mover, vida_label, contador_label,puntos_label,alcohol_label)
 
-    def reiniciar_hormiga(self, vida_label, contador_label):
+    def reiniciar_hormiga(self, vida_label, contador_label,puntos_label,alcohol_label):
         """Reinicia la posición y vida de la hormiga."""
         self.x = self.start_x
         self.y = self.start_y
         self.vida = 100  # O el valor que corresponda
         self.contador = 0
+        self.puntos = self.puntos
+        self.nivel_alcohol = self.nivel_alcohol
         vida_label.config(text=f"Vida: {self.vida}")
         contador_label.config(text=f"Movimientos: {self.contador}")
+        puntos_label.config(text=f"Puntos:{self.puntos}")
+        alcohol_label.config(text=f"Alcohol:{self.nivel_alcohol}")
         self.hormiga_oval = self.canvas.create_oval(self.x * 40, self.y * 40, (self.x + 1) * 40, (self.y + 1) * 40, fill="red")
 
 
 
-    def reiniciar_hormiga(self, vida_label, contador_label):
+    def reiniciar_hormiga(self, vida_label, contador_label,puntos_label,alcohol_label):
         """Reinicia la hormiga cuando muere."""
         self.x, self.y = self.start_x, self.start_y
         self.vida = 3  # Reinicia la vida
         self.contador = 0  # Reinicia el contador
+        self.puntos = self.puntos
+        self.nivel_alcohol = self.nivel_alcohol
         self.direccion = random.choice([(0, 1), (0, -1), (1, 0), (-1, 0)])  # Cambia la dirección
         self.hormiga_oval = self.canvas.create_oval(self.x * 40, self.y * 40, (self.x + 1) * 40, (self.y + 1) * 40, fill="red")
         vida_label.config(text=f"Vida: {self.vida}")
         contador_label.config(text=f"Movimientos: {self.contador}")
-        self.canvas.after(200, self.mover, vida_label, contador_label)
+        puntos_label.config(text=f"Puntos:{self.puntos}")
+        alcohol_label.config(text=f"Alcohol:{self.nivel_alcohol}")
+        self.canvas.after(200, self.mover, vida_label, contador_label,puntos_label, alcohol_label)
+
+    def comer(self,item):
+        if isinstance(item,Azucar):
+            item.consumir(self)
+        elif isinstance(item,Vino):
+            item.consumir(self)
+
+    def modificar_salud(self,cantidad):
+        self.vida = max(0,min(100,self.vida + cantidad))
+
+    def modificar_nivel_alcohol(self,cantidad):
+        self.nivel_alcohol = max(0,min(50,self.nivel_alcohol + cantidad))
 
 
+
+class Azucar:
+    def __init__(self, puntos=10):
+        self.puntos = puntos
+
+    def consumir(self,hormiga):
+        hormiga.puntos += self.puntos
+        print(f"Azúcar consumida. Puntos: {hormiga.puntos}")
+
+class Vino:
+    def __init__(self, nivel_alcohol=5):
+        self.nivel_alcohol = nivel_alcohol
+
+    def consumir(self,hormiga):
+        hormiga.modificar_nivel_alcohol(self.nivel_alcohol)
+        print(f"Vino consumido. Nivel de alcohol: {hormiga.nivel_alcohol}")
 
 
 
@@ -131,23 +188,27 @@ class MapaCanvas:
         self.vida_label = None
         self.contador_label = None
         self.puntos_label = None
+        self.alcohol_label=None
         self.tiempo = 0  # Inicializa el tiempo
         self.cronometro_corriendo = False  # Estado del cronómetro
 
-    def inicializar_datos(self, vida_label, contador_label, puntos_label):
+    def inicializar_datos(self, vida_label, contador_label, puntos_label, alcohol_label):
         self.vida_label = vida_label
         self.contador_label = contador_label
         self.puntos_label = puntos_label
-
+        self.alcohol_label = alcohol_label
         # Inicializar la hormiga con los valores iniciales
         self.hormiga = Hormiga(self.canvas, self.tamano_matriz)
         self.hormiga.vida = 3
         self.hormiga.contador = 0
+        self.hormiga.puntos=0
+        self.hormiga.alcohol = 0
 
         # Actualizar las etiquetas con los valores iniciales
         self.vida_label.config(text=f"Vida: {self.hormiga.vida}")
         self.contador_label.config(text=f"Tiempo: {self.tiempo}")
-        self.puntos_label.config(text="Puntos: 0")
+        self.puntos_label.config(text=f"Puntos: {self.hormiga.puntos}")
+        self.alcohol_label.config(text=f"Alcohol: {self.hormiga.alcohol}")
 
     def seleccionar_celda(self, event):
         """Selecciona la celda en la que se hizo clic y comienza la simulación de la hormiga."""
@@ -158,7 +219,7 @@ class MapaCanvas:
             # Establece la posición inicial de la hormiga
             self.hormiga.start_x, self.hormiga.start_y = j, i  # Guarda la posición de inicio
             self.hormiga.x, self.hormiga.y = j, i
-            self.hormiga.mover(self.vida_label, self.contador_label)  # Inicia el movimiento de la hormiga
+            self.hormiga.mover(self.vida_label, self.contador_label, self.puntos_label, self.alcohol_label)  # Inicia el movimiento de la hormiga
 
     def dibujar_mapa(self):
         """Dibuja la matriz en el Canvas."""

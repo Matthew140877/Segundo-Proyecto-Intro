@@ -73,8 +73,12 @@ class Master:
         self.puntos_label.pack(side="left")
         mapa_canvas.puntos_label = self.puntos_label
 
+        self.alcohol_label = Label(datos_frame, text="Puntos: 0")
+        self.alcohol_label.pack(side="left")
+        mapa_canvas.alcohol_label = self.alcohol_label
+
         # Inicializar la hormiga con referencia a las etiquetas
-        mapa_canvas.inicializar_datos(self.vida_label, self.contador_label, self.puntos_label)
+        mapa_canvas.inicializar_datos(self.vida_label, self.contador_label, self.puntos_label, self.alcohol_label)
 
 # Inicializar la aplicación
 root = Tk()

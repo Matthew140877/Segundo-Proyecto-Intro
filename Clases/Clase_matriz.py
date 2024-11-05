@@ -35,6 +35,9 @@ class MatrizApp:
         color_menu.add_command(label="Veneno", command=lambda: self.set_color("green"))
         color_menu.add_command(label="Muro", command=lambda: self.set_color("brown"))
         color_menu.add_command(label="Salida", command=lambda: self.set_color("yellow"))
+        color_menu.add_command(label="Vino", command=lambda: self.set_color("red"))
+        color_menu.add_command(label="Azucar", command=lambda: self.set_color("gray"))
+
 
         # Menú para cambiar tamaño de la matriz
         tamaño_menu = Menu(self.menu, tearoff=0)
